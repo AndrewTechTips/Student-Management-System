@@ -1,4 +1,5 @@
 import sys
+from multiprocessing import connection
 from tkinter import dialog
 
 from PyQt6.QtGui import QAction
@@ -72,21 +73,46 @@ class InsertDialog(QDialog):
         layout = QVBoxLayout()
 
         # Add student name widget
-        student_name = QLineEdit()
-        student_name.setPlaceholderText("Name")
-        layout.addWidget(student_name)
+        self.student_name = QLineEdit()
+        self.student_name.setPlaceholderText("Name")
+        layout.addWidget(self.student_name)
 
         # Add combo box of courses
-        course_name = QComboBox()
+        self.course_name = QComboBox()
         courses = ["Biology", "Math", "Astronomy", "Physics"]
-        course_name.addItems(courses)
-        layout.addWidget(course_name)
+        self.course_name.addItems(courses)
+        layout.addWidget(self.course_name)
+
+        # Add mobile widget
+        self.mobile = QLineEdit()
+        self.mobile.setPlaceholderText("Mobile")
+        layout.addWidget(self.mobile)
+
+        # Add a submit button
+        button = QPushButton("Register")
+        button.clicked.connect(self.add_student)
 
         self.setLayout(layout)
 
+    def add_student(self):
+        name = self.student_name.text()
+        course = self.course_name.itemText(self.course_name.currentIndex())
+        mobile = self.mobile.text()
+
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute(
+            "INSERT INTO students (name, course, mobile) VALUES (?, ?, ?)",
+            (name, course, mobile),
+        )
+        connection.commit()
+        cursor.close()
+        connection.close()
+        main_window.load_data()
+
 
 app = QApplication(sys.argv)
-age_calculator = MainWindow()
-age_calculator.show()
-age_calculator.load_data()
+main_window = MainWindow()
+main_window.show()
+main_window.load_data()
 sys.exit(app.exec())
