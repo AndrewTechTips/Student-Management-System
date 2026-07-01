@@ -1,4 +1,5 @@
 import sys
+from tkinter import dialog
 
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
@@ -11,6 +12,9 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QTableWidget,
     QTableWidgetItem,
+    QDialog,
+    QVBoxLayout,
+    QComboBox,
 )
 
 import sqlite3
@@ -25,6 +29,7 @@ class MainWindow(QMainWindow):
         help_menu_item = self.menuBar().addMenu("&Help")
 
         add_student_action = QAction("Add Student", self)
+        add_student_action.triggered.connect(self.insert)
         file_menu_item.addAction(add_student_action)
 
         about_action = QAction("About", self)
@@ -34,6 +39,7 @@ class MainWindow(QMainWindow):
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(("Id", "Name", "Course", "Mobile"))
+        self.table.verticalHeader().setVisible(False)
         self.setCentralWidget(self.table)
 
     def load_data(self):
@@ -50,6 +56,33 @@ class MainWindow(QMainWindow):
                 )
 
         connection.close()
+
+    def insert(self):
+        dialog = InsertDialog()
+        dialog.exec()
+
+
+class InsertDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Insert Student Data")
+        self.setFixedWidth(300)
+        self.setFixedHeight(300)
+
+        layout = QVBoxLayout()
+
+        # Add student name widget
+        student_name = QLineEdit()
+        student_name.setPlaceholderText("Name")
+        layout.addWidget(student_name)
+
+        # Add combo box of courses
+        course_name = QComboBox()
+        courses = ["Biology", "Math", "Astronomy", "Physics"]
+        course_name.addItems(courses)
+        layout.addWidget(course_name)
+
+        self.setLayout(layout)
 
 
 app = QApplication(sys.argv)
