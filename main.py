@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
     QStatusBar,
     QGridLayout,
     QLabel,
+    QMessageBox,
 )
 
 import sqlite3
@@ -203,6 +204,12 @@ class DeleteDialog(QDialog):
         connection.close()
 
         main_window.load_data()
+
+        self.close()
+        confirmation_widget = QMessageBox()
+        confirmation_widget.setWindowTitle("Success")
+        confirmation_widget.setText("The record was deleted successfully")
+        confirmation_widget.exec()
 
 
 class InsertDialog(QDialog):
