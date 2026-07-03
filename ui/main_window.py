@@ -11,21 +11,21 @@ from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QAbstractItemView,
+    QLineEdit,
 )
 
 from database import DataBaseConnection
-from .dialogs import InsertDialog, SearchDialog, EditDialog, DeleteDialog, AboutDialog
+from .dialogs import InsertDialog, EditDialog, DeleteDialog, AboutDialog
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Student Management System")
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(900, 600)
 
         file_menu_item = self.menuBar().addMenu("&File")
         help_menu_item = self.menuBar().addMenu("&Help")
-        edit_menu_item = self.menuBar().addMenu("&Edit")
 
         add_student_action = QAction(QIcon("assets/add.png"), "Add Student", self)
         add_student_action.triggered.connect(self.insert)
@@ -35,10 +35,6 @@ class MainWindow(QMainWindow):
         help_menu_item.addAction(about_action)
         about_action.setMenuRole(QAction.MenuRole.NoRole)
         about_action.triggered.connect(self.about)
-
-        search_student_action = QAction(QIcon("assets/search.png"), "Search", self)
-        search_student_action.triggered.connect(self.search)
-        edit_menu_item.addAction(search_student_action)
 
         self.table = QTableWidget()
         self.table.setColumnCount(6)
@@ -68,27 +64,38 @@ class MainWindow(QMainWindow):
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)  # Email
         header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
 
-        # Create toolbar and add toolbar elements
-        toolbar = QToolBar()
-        toolbar.setMovable(True)
-        self.addToolBar(toolbar)
-        toolbar.addAction(add_student_action)
-        toolbar.addAction(search_student_action)
-
-        # Create status bar and add status bar elements
-        self.statusbar = QStatusBar()
-        self.setStatusBar(self.statusbar)
-
         container = QWidget()
         layout = QVBoxLayout(container)
         layout.setContentsMargins(15, 15, 15, 15)
         layout.addWidget(self.table)
         self.setCentralWidget(container)
 
+        # Create toolbar and add toolbar elements
+        toolbar = QToolBar()
+        toolbar.setMovable(False)
+        self.addToolBar(toolbar)
+
+        toolbar.addAction(add_student_action)
+
+        self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("Search by Name, Email, Course or Group...")
+        self.search_bar.setFixedWidth(350)
+
+        # Add clear btn
+        self.search_bar.setClearButtonEnabled(True)
+
+        self.search_bar.textChanged.connect(self.load_data)
+        toolbar.addWidget(self.search_bar)
+
+        # Create status bar and add status bar elements
+        self.statusbar = QStatusBar()
+        self.setStatusBar(self.statusbar)
+
         # Detect a cell click
         self.table.cellClicked.connect(self.cell_clicked)
 
     def cell_clicked(self):
+        self.search_bar.clearFocus()
         edit_button = QPushButton("Edit Record")
         edit_button.clicked.connect(self.edit)
 
@@ -103,13 +110,25 @@ class MainWindow(QMainWindow):
         self.statusbar.addWidget(edit_button)
         self.statusbar.addWidget(delete_button)
 
-    def load_data(self):
+    def load_data(self, search_keyword=""):
         connection = DataBaseConnection().connect()
         cursor = connection.cursor()
-        cursor.execute("SELECT * FROM students")
-        result = cursor.fetchall()
 
+        if search_keyword:
+            query = """
+            SELECT * FROM students
+                WHERE name LIKE %s OR email LIKE %s OR student_group LIKE %s OR course LIKE %s
+            """
+            like_pattern = f"%{search_keyword}%"
+            cursor.execute(
+                query, (like_pattern, like_pattern, like_pattern, like_pattern)
+            )
+        else:
+            cursor.execute("SELECT * FROM students")
+
+        result = cursor.fetchall()
         self.table.setRowCount(0)
+        self.table.clearSelection()
 
         for row_number, row_data in enumerate(result):
             self.table.insertRow(row_number)
@@ -125,10 +144,6 @@ class MainWindow(QMainWindow):
 
     def insert(self):
         dialog = InsertDialog(self)
-        dialog.exec()
-
-    def search(self):
-        dialog = SearchDialog(self)
         dialog.exec()
 
     def edit(self):

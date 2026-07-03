@@ -1,5 +1,4 @@
 import re
-from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -248,39 +247,6 @@ class DeleteDialog(QDialog):
         confirmation_widget.setWindowTitle("Success")
         confirmation_widget.setText("The record was deleted successfully")
         confirmation_widget.exec()
-
-
-class SearchDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Search Student")
-        self.setFixedWidth(300)
-        self.setFixedHeight(300)
-
-        layout = QVBoxLayout()
-
-        self.name_input = QLineEdit()
-        self.name_input.setPlaceholderText("Name")
-        layout.addWidget(self.name_input)
-
-        search_btn = QPushButton("Search")
-        search_btn.clicked.connect(self.search)
-        layout.addWidget(search_btn)
-
-        self.setLayout(layout)
-
-    def search(self):
-        name = self.name_input.text()
-        connection = DataBaseConnection().connect()
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM students WHERE name = %s", (name,))
-
-        items = self.parent().table.findItems(name, Qt.MatchFlag.MatchFixedString)
-        for item in items:
-            self.parent().table.item(item.row(), 1).setSelected(True)
-
-        cursor.close()
-        connection.close()
 
 
 class AboutDialog(QMessageBox):
