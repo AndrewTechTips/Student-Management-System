@@ -1,4 +1,6 @@
 import re
+
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -249,12 +251,41 @@ class DeleteDialog(QDialog):
         confirmation_widget.exec()
 
 
-class AboutDialog(QMessageBox):
+class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("About")
-        content = """
-        This app was created during the course "The Python Mega Course".
-        Feel free to modify and reuse this app.
-        """
-        self.setText(content)
+        self.setWindowTitle("About Us")
+        self.setFixedSize(350, 220)
+
+        # Layout
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Title
+        title = QLabel("Student Management System")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #a78bfa;")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        description = QLabel(
+            "<p align='center' style='font-size: 13px; color: #e2e8f0; line-height: 1.5;'>"
+            "A modern, lightweight desktop application<br>"
+            "built for seamless student record management.<br><br>"
+            "Developed with <b>PyQt6</b> and <b>MySQL</b> by<br>"
+            "<span style='color: #8b5cf6; font-weight: bold;'>Constantin Andrei Condrea</span>."
+            "</p>"
+        )
+        description.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Close btn
+        close_btn = QPushButton("Close")
+        close_btn.setFixedWidth(120)
+        close_btn.clicked.connect(self.close)
+
+        layout.addWidget(title)
+        layout.addWidget(description)
+
+        # Add spacer
+        layout.addSpacing(15)
+        layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self.setLayout(layout)
