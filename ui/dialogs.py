@@ -1,3 +1,4 @@
+import re
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QDialog,
@@ -45,9 +46,27 @@ class InsertDialog(QDialog):
         self.setLayout(layout)
 
     def add_student(self):
-        name = self.student_name.text()
+        name = self.student_name.text().strip()
         course = self.course_name.itemText(self.course_name.currentIndex())
-        mobile = self.mobile.text()
+        mobile = self.mobile.text().strip()
+
+        # Name validation
+        if not name or len(name) < 3:
+            QMessageBox.warning(
+                self,
+                "Validation Error",
+                "Please enter a name with at least 3 characters",
+            )
+            return
+
+        # Mobile num validation
+        if not re.fullmatch(r"\+?\d{7,15}", mobile):
+            QMessageBox.warning(
+                self,
+                "Validation Error",
+                "Please enter a valid phone number.",
+            )
+            return
 
         connection = DataBaseConnection().connect()
         cursor = connection.cursor()
@@ -60,6 +79,7 @@ class InsertDialog(QDialog):
         connection.close()
 
         self.parent().load_data()
+        self.close()
 
 
 class EditDialog(QDialog):
@@ -103,14 +123,36 @@ class EditDialog(QDialog):
         self.setLayout(layout)
 
     def update_student(self):
+        name = self.student_name.text().strip()
+        course = self.course_name.itemText(self.course_name.currentIndex())
+        mobile = self.mobile.text().strip()
+
+        # Name validation
+        if not name or len(name) < 3:
+            QMessageBox.warning(
+                self,
+                "Validation Error",
+                "Please enter a name with at least 3 characters",
+            )
+            return
+
+        # Mobile num validation
+        if not re.fullmatch(r"\+?\d{7, 15}", mobile):
+            QMessageBox.warning(
+                self,
+                "Validation Error",
+                "Please enter a valid phone number.",
+            )
+            return
+
         connection = DataBaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute(
             "UPDATE students SET name = %s, course = %s, mobile = %s WHERE id = %s",
             (
-                self.student_name.text(),
-                self.course_name.itemText(self.course_name.currentIndex()),
-                self.mobile.text(),
+                name,
+                course,
+                mobile,
                 self.student_id,
             ),
         )
