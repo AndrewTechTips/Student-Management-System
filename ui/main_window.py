@@ -108,9 +108,11 @@ class MainWindow(QMainWindow):
     def cell_clicked(self):
         self.search_bar.clearFocus()
         edit_button = QPushButton("Edit Record")
+        edit_button.setObjectName("editButton")
         edit_button.clicked.connect(self.edit)
 
         delete_button = QPushButton("Delete Record")
+        delete_button.setObjectName("deleteButton")
         delete_button.clicked.connect(self.delete)
 
         children = self.findChildren(QPushButton)

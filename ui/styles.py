@@ -152,4 +152,37 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     border: none;
     background: transparent;
 }
+
+QPushButton#editButton {
+    background: transparent;
+    background-color: rgba(139, 92, 246, 0.1);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    padding: 6px 14px;
+}
+
+QPushButton#editButton:hover {
+    background-color: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    color: #ffffff;
+}
+
+QPushButton#deleteButton {
+    background: transparent;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 6px 14px;
+}
+
+QPushButton#deleteButton:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #ffffff;
+}
+
+QPushButton#deleteButton:pressed {
+    background-color: rgba(239, 68, 68, 0.3);
+}
+
 """
