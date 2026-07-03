@@ -117,6 +117,7 @@ class MainWindow(QMainWindow):
 
                 item = QTableWidgetItem(str(data))
                 item.setToolTip(str(data))
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
                 self.table.setItem(row_number, column_number, item)
 
