@@ -255,7 +255,7 @@ class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("About Us")
-        self.setFixedSize(350, 220)
+        self.setFixedWidth(380)
 
         # Layout
         layout = QVBoxLayout()
@@ -271,7 +271,7 @@ class AboutDialog(QDialog):
             "A modern, lightweight desktop application<br>"
             "built for seamless student record management.<br><br>"
             "Developed with <b>PyQt6</b> and <b>MySQL</b> by<br>"
-            "<span style='color: #8b5cf6; font-weight: bold;'>Constantin Andrei Condrea</span>."
+            "<span style='color: #8b5cf6; font-weight: bold;'>Condrea Andrei </span>."
             "</p>"
         )
         description.setAlignment(Qt.AlignmentFlag.AlignCenter)
