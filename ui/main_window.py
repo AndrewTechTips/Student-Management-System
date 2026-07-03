@@ -93,7 +93,8 @@ class MainWindow(QMainWindow):
 
         # Add export tool
         toolbar.addSeparator()
-        export_action = QAction("Export to CSV", self)
+        export_action = QAction(QIcon("assets/export.png"), "Export", self)
+        export_action.setToolTip("Export data to CSV")
         export_action.triggered.connect(self.export_to_csv)
         toolbar.addAction(export_action)
 

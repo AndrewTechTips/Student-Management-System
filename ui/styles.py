@@ -13,15 +13,21 @@ QDialog, QMessageBox {
 /* Table base style */
 QTableWidget {
     background-color: rgba(255, 255, 255, 0.03);
+    alternate-background-color: rgba(255, 255, 255, 0.015);
     color: #f8f8f2;
-    gridline-color: transparent;
+    gridline-color: transparent; 
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 12px;
     padding: 10px;
     font-size: 14px;
-    selection-background-color: rgba(139, 92, 246, 0.2);
+    selection-background-color: rgba(139, 92, 246, 0.2); 
     selection-color: #ffffff;
 }
+
+QTableWidget::item:hover {
+    background-color: rgba(139, 92, 246, 0.08); /* Un glow violet foarte subtil la trecerea mouse-ului */
+}
+
 
 /* Table header */
 QHeaderView::section {
