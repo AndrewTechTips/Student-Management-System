@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
     QHeaderView,
     QWidget,
     QVBoxLayout,
+    QAbstractItemView,
 )
 
 from database import DataBaseConnection
@@ -44,16 +45,28 @@ class MainWindow(QMainWindow):
         self.table.setHorizontalHeaderLabels(
             ("Id", "Name", "Course", "Mobile", "Email", "Group")
         )
+
+        # Make the table read-only from the interface
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+
+        # Hide unnecessary index column
         self.table.verticalHeader().setVisible(False)
 
         self.table.setShowGrid(False)
         self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
         self.table.verticalHeader().setDefaultSectionSize(45)
 
-        self.table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Stretch
-        )
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)  # Id
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)  # Name
+        header.setSectionResizeMode(
+            2, QHeaderView.ResizeMode.ResizeToContents
+        )  # Course
+        header.setSectionResizeMode(
+            3, QHeaderView.ResizeMode.ResizeToContents
+        )  # Mobile num
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)  # Email
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
 
         # Create toolbar and add toolbar elements
         toolbar = QToolBar()
@@ -101,9 +114,11 @@ class MainWindow(QMainWindow):
         for row_number, row_data in enumerate(result):
             self.table.insertRow(row_number)
             for column_number, data in enumerate(row_data):
-                self.table.setItem(
-                    row_number, column_number, QTableWidgetItem(str(data))
-                )
+
+                item = QTableWidgetItem(str(data))
+                item.setToolTip(str(data))
+
+                self.table.setItem(row_number, column_number, item)
 
         connection.close()
 
