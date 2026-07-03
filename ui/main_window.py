@@ -1,3 +1,4 @@
+import csv
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
@@ -12,6 +13,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QAbstractItemView,
     QLineEdit,
+    QFileDialog,
+    QMessageBox,
 )
 
 from database import DataBaseConnection
@@ -50,6 +53,7 @@ class MainWindow(QMainWindow):
 
         self.table.setShowGrid(False)
         self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.table.setAlternatingRowColors(True)
         self.table.verticalHeader().setDefaultSectionSize(45)
 
         header = self.table.horizontalHeader()
@@ -86,6 +90,12 @@ class MainWindow(QMainWindow):
 
         self.search_bar.textChanged.connect(self.load_data)
         toolbar.addWidget(self.search_bar)
+
+        # Add export tool
+        toolbar.addSeparator()
+        export_action = QAction("Export to CSV", self)
+        export_action.triggered.connect(self.export_to_csv)
+        toolbar.addAction(export_action)
 
         # Create status bar and add status bar elements
         self.statusbar = QStatusBar()
@@ -157,3 +167,36 @@ class MainWindow(QMainWindow):
     def about(self):
         dialog = AboutDialog(self)
         dialog.exec()
+
+    def export_to_csv(self):
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save CSV File", "", "CSV Files (*.csv)"
+        )
+
+        if path:
+            try:
+                with open(path, mode="w", newline="", encoding="utf-8") as file:
+                    writer = csv.writer(file)
+
+                    # Save the header
+                    headers = [
+                        self.table.horizontalHeaderItem(i).text()
+                        for i in range(self.table.columnCount())
+                    ]
+                    writer.writerow(headers)
+
+                    for row in range(self.table.rowCount()):
+                        row_data = []
+                        for column in range(self.table.columnCount()):
+                            item = self.table.item(row, column)
+                            if item is not None:
+                                row_data.append(item.text())
+                            else:
+                                row_data.append("")
+                        writer.writerow(row_data)
+
+                QMessageBox.information(
+                    self, "Success", "Data successfully exported to CSV!"
+                )
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Could not export data: {e}")
