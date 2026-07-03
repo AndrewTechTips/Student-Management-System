@@ -1,3 +1,4 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
     QMainWindow,
@@ -6,7 +7,11 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QToolBar,
     QStatusBar,
+    QHeaderView,
+    QWidget,
+    QVBoxLayout,
 )
+
 from database import DataBaseConnection
 from .dialogs import InsertDialog, SearchDialog, EditDialog, DeleteDialog, AboutDialog
 
@@ -38,7 +43,15 @@ class MainWindow(QMainWindow):
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(("Id", "Name", "Course", "Mobile"))
         self.table.verticalHeader().setVisible(False)
-        self.setCentralWidget(self.table)
+
+        self.table.setShowGrid(False)
+        self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
+        self.table.verticalHeader().setDefaultSectionSize(45)
+
+        self.table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
 
         # Create toolbar and add toolbar elements
         toolbar = QToolBar()
@@ -50,6 +63,12 @@ class MainWindow(QMainWindow):
         # Create status bar and add status bar elements
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
+
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.addWidget(self.table)
+        self.setCentralWidget(container)
 
         # Detect a cell click
         self.table.cellClicked.connect(self.cell_clicked)
