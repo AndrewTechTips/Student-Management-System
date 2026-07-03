@@ -1,5 +1,4 @@
 import sys
-from multiprocessing import connection
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
@@ -20,15 +19,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
 )
 
-import sqlite3
-
-
-class DataBaseConnection:
-    def __init__(self, database_file="database.db"):
-        self.database_file = database_file
-
-    def connect(self):
-        return sqlite3.connect(self.database_file)
+import mysql.connector
 
 
 class MainWindow(QMainWindow):
@@ -91,7 +82,9 @@ class MainWindow(QMainWindow):
 
     def load_data(self):
         connection = DataBaseConnection().connect()
-        result = connection.execute("SELECT * FROM students")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM students")
+        result = cursor.fetchall()
 
         self.table.setRowCount(0)
 
@@ -130,7 +123,7 @@ class AboutDialog(QMessageBox):
         super().__init__()
         self.setWindowTitle("About")
         content = """
-        This app was created druring the course "The Python Mega Course".
+        This app was created during the course "The Python Mega Course".
         Feel free to modify and reuse this app.
         """
         self.setText(content)
@@ -180,7 +173,7 @@ class EditDialog(QDialog):
         connection = DataBaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE students SET name = ?, course = ?, mobile = ? WHERE id = ?",
+            "UPDATE students SET name = %s, course = %s, mobile = %s WHERE id = %s",
             (
                 self.student_name.text(),
                 self.course_name.itemText(self.course_name.currentIndex()),
@@ -220,7 +213,7 @@ class DeleteDialog(QDialog):
 
         connection = DataBaseConnection().connect()
         cursor = connection.cursor()
-        cursor.execute("DELETE from students WHERE id = ?", (student_id,))
+        cursor.execute("DELETE from students WHERE id = %s", (student_id,))
 
         connection.commit()
         cursor.close()
@@ -275,7 +268,7 @@ class InsertDialog(QDialog):
         connection = DataBaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO students (name, course, mobile) VALUES (?, ?, ?)",
+            "INSERT INTO students (name, course, mobile) VALUES (%s, %s, %s)",
             (name, course, mobile),
         )
         connection.commit()
@@ -307,8 +300,8 @@ class SearchDialog(QDialog):
         name = self.name_input.text()
         connection = DataBaseConnection().connect()
         cursor = connection.cursor()
-        result = cursor.execute("SELECT * FROM students WHERE name = ?", (name,))
-        rows = list(result)
+        cursor.execute("SELECT * FROM students WHERE name = %s", (name,))
+        result = cursor.fetchall()
         items = main_window.table.findItems(name, Qt.MatchFlag.MatchFixedString)
         for item in items:
             main_window.table.item(item.row(), 1).setSelected(True)
