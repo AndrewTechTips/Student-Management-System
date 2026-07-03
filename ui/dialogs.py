@@ -18,28 +18,38 @@ class InsertDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Insert Student Data")
         self.setFixedWidth(300)
-        self.setFixedHeight(300)
+        self.setFixedHeight(400)
 
         layout = QVBoxLayout()
 
         # Add student name widget
         self.student_name = QLineEdit()
-        self.student_name.setPlaceholderText("Name")
+        self.student_name.setPlaceholderText("Full Name")
         layout.addWidget(self.student_name)
 
         # Add combo box of courses
         self.course_name = QComboBox()
-        courses = ["Biology", "Math", "Astronomy", "Physics"]
+        courses = ["Biology", "Math", "Astronomy", "Physics", "Computer Science"]
         self.course_name.addItems(courses)
         layout.addWidget(self.course_name)
 
         # Add mobile widget
         self.mobile = QLineEdit()
-        self.mobile.setPlaceholderText("Mobile")
+        self.mobile.setPlaceholderText("+1234567890")
         layout.addWidget(self.mobile)
 
+        # Add email widget
+        self.email = QLineEdit()
+        self.email.setPlaceholderText("name@example.com")
+        layout.addWidget(self.email)
+
+        # Add student group widget
+        self.student_group = QLineEdit()
+        self.student_group.setPlaceholderText("Group (e.g., Gr 1, Math Prep)")
+        layout.addWidget(self.student_group)
+
         # Add a submit button
-        button = QPushButton("Register")
+        button = QPushButton("Save Record")
         button.clicked.connect(self.add_student)
         layout.addWidget(button)
 
@@ -49,13 +59,15 @@ class InsertDialog(QDialog):
         name = self.student_name.text().strip()
         course = self.course_name.itemText(self.course_name.currentIndex())
         mobile = self.mobile.text().strip()
+        email = self.email.text().strip()
+        group = self.student_group.text().strip()
 
         # Name validation
         if not name or len(name) < 3:
             QMessageBox.warning(
                 self,
-                "Validation Error",
-                "Please enter a name with at least 3 characters",
+                "Invalid Input",
+                "Name needs at least 3 characters.",
             )
             return
 
@@ -63,16 +75,26 @@ class InsertDialog(QDialog):
         if not re.fullmatch(r"\+?\d{7,15}", mobile):
             QMessageBox.warning(
                 self,
-                "Validation Error",
+                "Invalid Input",
                 "Please enter a valid phone number.",
             )
+            return
+
+        # Email validation
+        if not re.fullmatch(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
+            QMessageBox.warning(self, "Invalid Input", "Please provide a valid email.")
+            return
+
+        # Group validation
+        if not group:
+            QMessageBox.warning(self, "Invalid Input", "Group cannot be empty.")
             return
 
         connection = DataBaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO students (name, course, mobile) VALUES (%s, %s, %s)",
-            (name, course, mobile),
+            "INSERT INTO students (name, course, mobile, email, student_group) VALUES (%s, %s, %s, %s, %s)",
+            (name, course, mobile, email, group),
         )
         connection.commit()
         cursor.close()
@@ -87,7 +109,7 @@ class EditDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Update Student Data")
         self.setFixedWidth(300)
-        self.setFixedHeight(300)
+        self.setFixedHeight(400)
 
         layout = QVBoxLayout()
 
@@ -105,7 +127,7 @@ class EditDialog(QDialog):
         # Add combo box of courses
         course_name = self.parent().table.item(index, 2).text()
         self.course_name = QComboBox()
-        courses = ["Biology", "Math", "Astronomy", "Physics"]
+        courses = ["Biology", "Math", "Astronomy", "Physics", "Computer Science"]
         self.course_name.addItems(courses)
         self.course_name.setCurrentText(course_name)
         layout.addWidget(self.course_name)
@@ -115,8 +137,18 @@ class EditDialog(QDialog):
         self.mobile = QLineEdit(mobile)
         layout.addWidget(self.mobile)
 
+        # Add email widget
+        email_item = self.parent().table.item(index, 4)
+        self.email = QLineEdit(email_item.text() if email_item else "")
+        layout.addWidget(self.email)
+
+        # Add group widget
+        group_item = self.parent().table.item(index, 5)
+        self.student_group = QLineEdit(group_item.text() if group_item else "")
+        layout.addWidget(self.student_group)
+
         # Add a submit button
-        button = QPushButton("Update")
+        button = QPushButton("Update Record")
         button.clicked.connect(self.update_student)
         layout.addWidget(button)
 
@@ -126,33 +158,46 @@ class EditDialog(QDialog):
         name = self.student_name.text().strip()
         course = self.course_name.itemText(self.course_name.currentIndex())
         mobile = self.mobile.text().strip()
+        email = self.email.text().strip()
+        group = self.student_group.text().strip()
 
-        # Name validation
         if not name or len(name) < 3:
             QMessageBox.warning(
                 self,
-                "Validation Error",
-                "Please enter a name with at least 3 characters",
+                "Invalid Input",
+                "Name needs at least 3 characters.",
             )
             return
 
-        # Mobile num validation
-        if not re.fullmatch(r"\+?\d{7, 15}", mobile):
+            # Mobile num validation
+        if not re.fullmatch(r"\+?\d{7,15}", mobile):
             QMessageBox.warning(
                 self,
-                "Validation Error",
+                "Invalid Input",
                 "Please enter a valid phone number.",
             )
+            return
+
+            # Email validation
+        if not re.fullmatch(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
+            QMessageBox.warning(self, "Invalid Input", "Please provide a valid email.")
+            return
+
+            # Group validation
+        if not group:
+            QMessageBox.warning(self, "Invalid Input", "Group cannot be empty.")
             return
 
         connection = DataBaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE students SET name = %s, course = %s, mobile = %s WHERE id = %s",
+            "UPDATE students SET name = %s, course = %s, mobile = %s, email = %s, student_group = %s WHERE id = %s",
             (
                 name,
                 course,
                 mobile,
+                email,
+                group,
                 self.student_id,
             ),
         )

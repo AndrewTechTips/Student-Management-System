@@ -40,8 +40,10 @@ class MainWindow(QMainWindow):
         edit_menu_item.addAction(search_student_action)
 
         self.table = QTableWidget()
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(("Id", "Name", "Course", "Mobile"))
+        self.table.setColumnCount(6)
+        self.table.setHorizontalHeaderLabels(
+            ("Id", "Name", "Course", "Mobile", "Email", "Group")
+        )
         self.table.verticalHeader().setVisible(False)
 
         self.table.setShowGrid(False)
